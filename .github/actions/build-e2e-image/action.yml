@@ -1,0 +1,68 @@
+name: Build e2e image
+description: Builds e2e image for a given branch, tag and push it to docker hub
+inputs:
+  version:
+    description: e2e version to build
+    required: false
+    default: latest
+  tag:
+    description: Tag name for the resulting image
+    required: true
+  userName:
+    description: User to push image
+    required: true
+  password:
+    description: Password of user
+    required: true
+  
+runs:
+  using: composite
+  steps:
+    - name: Run Configuration
+      run: |
+        echo "#####################"
+        echo "* Building ${{inputs.version}}"
+        echo "* Push configured as: ${{inputs.push}}"
+        echo "* Tag configured as: ${{inputs.tag}}"
+        echo "#####################"
+      shell: bash
+
+    - name: Check for corresponding branch exists
+      if: ${{ inputs.version != 'latest' }}
+      uses: octokit/request-action@v2.x
+      id: check-branch
+      env:
+        GITHUB_TOKEN: ${{ secret.GITHUB_TOKEN }}
+      with:
+        route: GET /repos/{owner}/{repo}/branches/{branch}
+        owner: AnhNg-GithubActions
+        repo: e2e
+        branch: ${{ inputs.version }}
+
+    - uses: actions/checkout@v2
+      if: ${{ inputs.version != 'latest' }}
+      id: checkout
+      with:
+        path: ./${{ inputs.version }}
+        repository: AnhNg-GithubActions/e2e
+        ref: ${{ inputs.version }}
+        token: ${{ secret.GITHUB_TOKEN }}
+
+    - name: Set up Docker Buildx
+      if: ${{ inputs.version != 'latest' }}
+      uses: docker/setup-buildx-action@v2
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_HUB_USERNAME }}
+        password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+    - name: Build and push
+      uses: docker/build-push-action@v4
+      with:
+        context: ./${{ inputs.version }}/e2e
+        file: ./${{ inputs.version }}/e2e/Dockerfile
+        push: true
+        load: true
+        tags: e2e:${{inputs.tag}}
