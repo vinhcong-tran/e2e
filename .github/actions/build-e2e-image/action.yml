@@ -70,8 +70,8 @@ runs:
     - name: Build and push
       uses: docker/build-push-action@v4
       with:
-        context: ./${{ inputs.version }}/e2e
-        file: ./${{ inputs.version }}/e2e/Dockerfile
+        context: ./${{ inputs.version }}
+        file: ./${{ inputs.version }}/Dockerfile
         push: true
         # load: true
         tags: e2e:${{inputs.tag}}
