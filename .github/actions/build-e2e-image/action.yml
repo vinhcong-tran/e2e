@@ -32,7 +32,7 @@ runs:
       uses: octokit/request-action@v2.x
       id: check-branch
       env:
-        GITHUB_TOKEN: ${{ secret.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secret.GH_TOKEN }}
       with:
         route: GET /repos/{owner}/{repo}/branches/{branch}
         owner: AnhNg-GithubActions
@@ -46,7 +46,7 @@ runs:
         path: ./${{ inputs.version }}
         repository: AnhNg-GithubActions/e2e
         ref: ${{ inputs.version }}
-        token: ${{ secret.GITHUB_TOKEN }}
+        token: ${{ secret.GH_TOKEN }}
 
     - name: Set up Docker Buildx
       if: ${{ inputs.version != 'latest' }}
