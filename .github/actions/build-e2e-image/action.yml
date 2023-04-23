@@ -8,12 +8,6 @@ inputs:
   tag:
     description: Tag name for the resulting image
     required: true
-  userName:
-    description: User to push image
-    required: true
-  password:
-    description: Password of user
-    required: true
   token:
     description: Github token
     required: true
@@ -22,6 +16,9 @@ inputs:
     required: true
   docker-hub-token:
     description: Token of user
+    required: true
+  docker-hub-address:
+    description:  Docker Hub address
     required: true
   
 runs:
@@ -73,6 +70,4 @@ runs:
         context: ./${{ inputs.version }}
         file: ./${{ inputs.version }}/Dockerfile
         push: true
-        tags: anhnguyen104/e2e:${{inputs.tag}}
-        # secrets: |
-        #     GIT_AUTH_TOKEN=${{ inputs.token }}
+        tags: ${{inputs.docker-hub-address}}/e2e:${{inputs.tag}}
