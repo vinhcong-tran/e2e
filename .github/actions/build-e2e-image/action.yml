@@ -73,5 +73,6 @@ runs:
         context: ./${{ inputs.version }}
         file: ./${{ inputs.version }}/Dockerfile
         push: true
-        # load: true
         tags: e2e:${{inputs.tag}}
+        secrets: |
+            GIT_AUTH_TOKEN=${{ inputs.token }}
