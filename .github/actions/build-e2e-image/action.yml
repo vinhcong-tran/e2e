@@ -73,5 +73,5 @@ runs:
         context: ./${{ inputs.version }}/e2e
         file: ./${{ inputs.version }}/e2e/Dockerfile
         push: true
-        load: true
+        # load: true
         tags: e2e:${{inputs.tag}}
