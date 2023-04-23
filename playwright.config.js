@@ -1,6 +1,6 @@
 import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
-  reporter: [["html", { open: "never" }]],
-//   reporter: "line",
+  // reporter: [["html", { open: "never" }]],
+  reporter: "line",
 });
