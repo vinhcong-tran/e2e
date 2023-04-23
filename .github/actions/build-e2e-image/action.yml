@@ -14,6 +14,9 @@ inputs:
   password:
     description: Password of user
     required: true
+  token:
+    description: Github token
+    required: true
   
 runs:
   using: composite
@@ -32,7 +35,7 @@ runs:
       uses: octokit/request-action@v2.x
       id: check-branch
       env:
-        GITHUB_TOKEN: ${{ secret.GH_TOKEN }}
+        GITHUB_TOKEN: ${{ inputs.token }}
       with:
         route: GET /repos/{owner}/{repo}/branches/{branch}
         owner: AnhNg-GithubActions
@@ -46,7 +49,7 @@ runs:
         path: ./${{ inputs.version }}
         repository: AnhNg-GithubActions/e2e
         ref: ${{ inputs.version }}
-        token: ${{ secret.GH_TOKEN }}
+        token: ${{ inputs.token }}
 
     - name: Set up Docker Buildx
       if: ${{ inputs.version != 'latest' }}
