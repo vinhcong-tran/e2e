@@ -2,12 +2,13 @@ name: Build e2e image
 description: Builds e2e image for a given branch, tag and push it to docker hub
 inputs:
   version:
-    description: e2e version to build
+    description: e2e version (branch) to build 
     required: false
     default: main
   tag:
     description: Tag name for the resulting image
-    required: true
+    required: false
+    default: latest
   token:
     description: Github token
     required: true
