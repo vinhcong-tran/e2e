@@ -4,7 +4,7 @@ inputs:
   version:
     description: e2e version to build
     required: false
-    default: latest
+    default: main
   tag:
     description: Tag name for the resulting image
     required: true
