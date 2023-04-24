@@ -12,10 +12,16 @@ jobs:
   build-and-push-image:
     runs-on: ubuntu-latest
     steps:
-      - name: Build and push image
-        uses: ./.github/actions/build-e2e-image
+      - uses: actions/checkout@v3
         with:
-          tag: main
+          path: ./actions
+          repository: AnhNg-GithubActions/e2e
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: ./actions/.github/actions/build-e2e-image
+        with:
+          tag: latest
           docker-hub-user: ${{ secrets.DOCKER_HUB_USER }}
           docker-hub-token: ${{ secrets.DOCKER_HUB_TOKEN }}
           token: ${{ secrets.GITHUB_TOKEN }}
