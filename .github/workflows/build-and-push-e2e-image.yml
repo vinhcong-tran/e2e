@@ -1,0 +1,22 @@
+name: Build and push latest e2e image to Docker Hub
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+      
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build and push image
+        uses: ./.github/actions/build-e2e-image
+        with:
+          tag: main
+          docker-hub-user: ${{ secrets.DOCKER_HUB_USER }}
+          docker-hub-token: ${{ secrets.DOCKER_HUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          docker-hub-address: ${{env.DOCKER_HUB_USER}} 
