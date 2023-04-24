@@ -25,4 +25,4 @@ jobs:
           docker-hub-user: ${{ secrets.DOCKER_HUB_USER }}
           docker-hub-token: ${{ secrets.DOCKER_HUB_TOKEN }}
           token: ${{ secrets.GITHUB_TOKEN }}
-          docker-hub-address: ${{env.DOCKER_HUB_USER}} 
+          docker-hub-address: anhnguyen104
