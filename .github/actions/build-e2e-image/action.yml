@@ -31,6 +31,7 @@ runs:
         echo "* Building ${{inputs.version}}"
         echo "* Push configured as: ${{inputs.push}}"
         echo "* Tag configured as: ${{inputs.tag}}"
+        echo "* Docker Hub address as: ${{inputs.docker-hub-address}}"
         echo "#####################"
       shell: bash
 
