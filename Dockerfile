@@ -11,3 +11,4 @@ COPY . .
 
 RUN npm i && npx playwright install chromium --with-deps
 
+ENTRYPOINT ["/bin/bash","-c"]
