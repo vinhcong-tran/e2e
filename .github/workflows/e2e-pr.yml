@@ -107,7 +107,7 @@ jobs:
 
       - name: Build E2E for branch
         if: ${{  ( github.head_ref || github.ref_name )  != 'main' }}
-        uses: ./actions/.github/actions/build-app-image
+        uses: ./actions/.github/actions/build-e2e-image
         with:
           version: ${{  ( github.head_ref || github.ref_name )  }}
           tag: ${{ env.TAG }}
