@@ -1,0 +1,138 @@
+name: Run E2E on PR
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check_labels:
+    runs-on: 
+      - ubuntu-latest
+    outputs:
+      app: ${{ steps.app.outputs.app }}
+    steps:
+      - name: "Check 'PR: Breaking change' label exists"
+        id: check_breaking_change
+        uses: docker://agilepathway/pull-request-label-checker:v1.0.103
+        continue-on-error: true
+        with:
+          one_of: 'PR: Breaking change'
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Standard app Branch
+        run: echo "APP=main" >> $GITHUB_ENV
+
+      - name: Check for corresponding branch exists
+        if: steps.check_breaking_change.outcome == 'success'
+        continue-on-error: true
+        uses: octokit/request-action@v2.x
+        id: check-app-branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          with:
+          route: GET /repos/{owner}/{repo}/branches/{branch}
+          owner: AnhNg-GithubActions
+          repo: app
+          branch: ${{ github.head_ref || github.ref_name }}
+
+      - name: Override with custom app Branch
+        if:
+          steps.check_breaking_change.outcome == 'success' && steps.check-app-branch.outcome
+          == 'success'
+        run: echo "APP=${{ github.head_ref || github.ref_name }}" >> $GITHUB_ENV
+
+      - name: Set app to output
+        id: app
+        run: echo "app=${{ env.APP }}" >> $GITHUB_OUTPUT
+  
+  build-app-image:
+    runs-on:
+      - ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - name: Set custom name
+        if: ${{  ( needs.check_labels.outputs.app )  != 'main' }}
+        run: echo "TAG=pr-${{github.run_id}}" >> $GITHUB_ENV
+
+      - name: Set standard name
+        if: ${{  ( needs.check_labels.outputs.app )  == 'main' }}
+        run: echo "TAG=latest" >> $GITHUB_ENV
+
+      - name: Set name as job output
+        id: tag
+        run: echo "tag=${{ env.TAG }}" >> $GITHUB_OUTPUT
+
+      - uses: actions/checkout@v3
+        with:
+          path: ./actions
+          repository: AnhNg-GithubActions/app
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build APP for branch
+        if: ${{  needs.check_labels.outputs.app  != 'main' }}
+        uses: ./actions/.github/actions/build-app-image
+        with:
+          version: ${{  needs.check_labels.outputs.app  }}
+          tag: ${{ env.TAG }}
+          docker-hub-user: ${{ secrets.DOCKER_HUB_USER }}
+          docker-hub-token: ${{ secrets.DOCKER_HUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          docker-hub-address: ${{secrets.DOCKER_HUB_USER}}
+    needs: check_labels
+
+  build-e2e-image:
+    runs-on:
+      - ubuntu-latest
+    outputs:
+        tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - name: Set custom name
+        # if: ${{  ( github.head_ref || github.ref_name )  != 'main' }}
+        run: echo "TAG=pr-${{github.run_id}}" >> $GITHUB_ENV
+
+      # - name: Set standard name
+      #   if: ${{  ( github.head_ref || github.ref_name )  == 'main' }}
+      #   run: echo "TAG=latest" >> $GITHUB_ENV
+
+      - name: Set name as job output
+        id: tag
+        run: echo "tag=${{ env.TAG }}" >> $GITHUB_OUTPUT
+
+      - uses: actions/checkout@v3
+        with:
+          path: ./actions
+          repository: AnhNg-GithubActions/e2e
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build E2E for branch
+        if: ${{  ( github.head_ref || github.ref_name )  != 'main' }}
+        uses: ./actions/.github/actions/build-app-image
+        with:
+          version: ${{  ( github.head_ref || github.ref_name )  }}
+          tag: ${{ env.TAG }}
+          docker-hub-user: ${{ secrets.DOCKER_HUB_USER }}
+          docker-hub-token: ${{ secrets.DOCKER_HUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          docker-hub-address: ${{secrets.DOCKER_HUB_USER}}
+    needs: check_labels
+
+  run-e2e-with-configuration:
+    runs-on: ubuntu-latest
+    needs: 
+        - check_labels
+        - build-e2e-image
+        - build-app-image
+    steps:
+        - uses: actions/checkout@v3
+          id: checkout
+          with:
+            path: ./local-run
+            repository: AnhNg-GithubActions/local-run
+            token: ${{ secrets.GITHUB_TOKEN }}
+
+        - name: Run E2E for given configuration
+          uses: ./local-run/.github/actions/run-e2e
+          with:
+            e2e-image: ${{secrets.DOCKER_HUB_USER}}/e2e:${{needs.build-e2e-image.outputs.tag}}
+            app-image: ${{secrets.DOCKER_HUB_USER}}/app:${{needs.build-app-image.outputs.tag}}
