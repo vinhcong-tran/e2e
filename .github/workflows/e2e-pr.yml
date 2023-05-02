@@ -88,12 +88,7 @@ jobs:
         tag: ${{ steps.tag.outputs.tag }}
     steps:
       - name: Set custom name
-        # if: ${{  ( github.head_ref || github.ref_name )  != 'main' }}
         run: echo "TAG=pr-${{github.run_id}}" >> $GITHUB_ENV
-
-      # - name: Set standard name
-      #   if: ${{  ( github.head_ref || github.ref_name )  == 'main' }}
-      #   run: echo "TAG=latest" >> $GITHUB_ENV
 
       - name: Set name as job output
         id: tag
@@ -115,7 +110,6 @@ jobs:
           docker-hub-token: ${{ secrets.DOCKER_HUB_TOKEN }}
           token: ${{ secrets.GITHUB_TOKEN }}
           docker-hub-address: ${{secrets.DOCKER_HUB_USER}}
-    needs: check_labels
 
   run-e2e-with-configuration:
     runs-on: ubuntu-latest
