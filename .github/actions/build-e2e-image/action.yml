@@ -43,7 +43,7 @@ runs:
         GITHUB_TOKEN: ${{ inputs.token }}
       with:
         route: GET /repos/{owner}/{repo}/branches/{branch}
-        owner: AnhNg-GithubActions
+        owner: vinhcong-tran
         repo: e2e
         branch: ${{ inputs.version }}
 
@@ -52,7 +52,7 @@ runs:
       id: checkout
       with:
         path: ./${{ inputs.version }}
-        repository: AnhNg-GithubActions/e2e
+        repository: vinhcong-tran/e2e
         ref: ${{ inputs.version }}
         token: ${{ inputs.token }}
 
